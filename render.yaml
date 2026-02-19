@@ -4,8 +4,8 @@ services:
     env: node
     plan: free
     region: oregon
-    buildCommand: "cd backend && npm ci"
-    startCommand: "cd backend && npx prisma migrate deploy && npm run start"
+    buildCommand: "cd flowchief/backend && npm ci"
+    startCommand: "cd flowchief/backend && npx prisma migrate deploy && npm run start"
     envVars:
       - key: NODE_ENV
         value: production
