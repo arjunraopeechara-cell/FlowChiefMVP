@@ -1,0 +1,68 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String        @id @default(cuid())
+  email        String        @unique
+  passwordHash String        @map("password_hash")
+  createdAt    DateTime      @default(now()) @map("created_at")
+  updatedAt    DateTime      @updatedAt @map("updated_at")
+
+  settings     UserSettings?
+  oauthTokens  OAuthTokens[]
+  briefings    BriefingLog[]
+}
+
+model UserSettings {
+  id               String   @id @default(cuid())
+  userId           String   @unique @map("user_id")
+  timeZone         String   @map("time_zone")
+  briefingTime     String   @map("briefing_time")
+  workDays         String   @map("work_days")
+  includeCalendar  Boolean  @default(true) @map("include_calendar")
+  includeEmails    Boolean  @default(true) @map("include_emails")
+  includeReplies   Boolean  @default(true) @map("include_replies")
+  tone             String   @default("neutral professional")
+  tasksText        String?  @map("tasks_text")
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+
+  user             User     @relation(fields: [userId], references: [id])
+}
+
+model OAuthTokens {
+  id           String   @id @default(cuid())
+  userId       String   @map("user_id")
+  provider     String
+  accessToken  String   @map("access_token")
+  refreshToken String?  @map("refresh_token")
+  expiry       DateTime
+  scopes       String
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  user         User     @relation(fields: [userId], references: [id])
+
+  @@index([userId, provider])
+}
+
+model BriefingLog {
+  id           String   @id @default(cuid())
+  userId       String   @map("user_id")
+  date         String
+  sentAt       DateTime? @map("sent_at")
+  status       String
+  errorMessage String?  @map("error_message")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  user         User     @relation(fields: [userId], references: [id])
+
+  @@unique([userId, date])
+}
